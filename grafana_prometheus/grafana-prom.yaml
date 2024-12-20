@@ -1,0 +1,38 @@
+version: '3.8'
+
+#networks:
+#  grafana-prom:
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    restart: always
+    ports:
+      - "9090:9090"
+#    networks:
+#      - grafana-prom
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=native-histograms
+  grafana:
+    image: grafana/grafana:9.5.15
+    restart: always
+    ports:
+      - "3000:3000"
+#    networks:
+#      - grafana-prom
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_BASIC_ENABLED=false
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./grafana:/etc/grafana/provisioning/
+
+volumes:
+  grafana:
